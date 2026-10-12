@@ -663,21 +663,35 @@
         }
 
         // 비속어/패드립 필터링 리스트 (필요에 따라 단어 추가 가능)
-        const badWords = [
-            "시발", "씨발", "새끼", "개새", "병신", "지랄", "존나", "엠생", "꺼져", 
-            "죽어", "느금", "느개비", "느닷", "엄빠욕", "년", "놈", "쓰레기", "개구라",
-            "쪽발이", "TLQKF", "TMQSLEK", "QKF", "TMT", "fuck", "shit", "bastard"
-        ];
-
+     // 비속어 및 패드립 강력 검열 로직
         function containsBadWord(text) {
-            // 띄어쓰기나 특수문자를 제거하여 우회하는 입력도 잡기 위해 정리
+            // 특수문자, 띄어쓰기 제거 및 소문자 변환
             const cleanedText = text.toLowerCase().replace(/[\s.,-_~!@#$%^&*()+=]/g, '');
             
+            // 1. 기본 욕설/비속어 리스트
+            const badWords = [
+                "시발", "씨발", "새끼", "개새", "병신", "지랄", "존나", "엠생", "꺼져", 
+                "죽어", "년", "놈", "쓰레기", "쪽발이", "tlqkf", "tmqslek", "fuck", "shit", "bastard"
+            ];
+
             for (let word of badWords) {
-                if (cleanedText.includes(word.toLowerCase())) {
+                if (cleanedText.includes(word)) {
                     return true;
                 }
             }
+
+            // 2. 패드립 조합 패턴 감지 (니/너/느 + 엄마/어머니/아빠/아버지/부모 등)
+            const familyWords = ["엄마", "어머니", "아빠", "아버지", "부모", "느그", "느개비"];
+            const targetPrefixes = ["니", "네", "느", "너네", "너희", "니네"];
+
+            for (let prefix of targetPrefixes) {
+                for (let fam of familyWords) {
+                    if (cleanedText.includes(prefix + fam)) {
+                        return true;
+                    }
+                }
+            }
+
             return false;
         }
 
